@@ -65,6 +65,14 @@
 @property (nonatomic, readonly) CGImageRef bitmapImage; /** generates an image on the fly */
 #endif
 
+#if TARGET_OS_IPHONE
+- (UIImage *) bitmapImageFlipped:(BOOL)flipVerically;//flipped vertically for use with openGL
+#else
+- (CGImageRef) bitmapImageFlipped:(BOOL)flipVerically;//flipped vertically for use with openGL
+#endif
+
+
+
 @property (nonatomic, retain, readonly) SVGKSource* source;
 @property (nonatomic, retain, readonly) SVGKParseResult* parseErrorsAndWarnings;
 

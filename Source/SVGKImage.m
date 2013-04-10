@@ -275,12 +275,12 @@ static NSMutableDictionary* globalSVGKImageCache;
 }
 
 #if TARGET_OS_IPHONE
--(UIImage *)bitmapImage
+- (UIImage *) bitmapImageFlipped:(BOOL)flipVerically//flipped vertically for use with openGL
 #else
--(CGImageRef)bitmapImage
+- (CGImageRef) bitmapImageFlipped:(BOOL)flipVerically//flipped vertically for use with openGL
 #endif
 {
-	NSAssert( self.DOMTree != nil, @"You cannot request a .bitmapImage for an SVG that you haven't parsed yet! There's no data to return!");
+    NSAssert( self.DOMTree != nil, @"You cannot request a .bitmapImage for an SVG that you haven't parsed yet! There's no data to return!");
 	NSDate* startTime;
 	
 	if( CALayerTree == nil )
@@ -301,6 +301,11 @@ static NSMutableDictionary* globalSVGKImageCache;
     CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
     CGContextRef context = CGBitmapContextCreate(NULL, self.size.width, self.size.height, 8, 0, colorSpace, kCGImageAlphaPremultipliedLast);
 #endif
+    
+    if(flipVerically){
+        CGAffineTransform flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, self.size.height);
+        CGContextConcatCTM(context, flipVertical);
+    }
 	
 	[self.CALayerTree renderInContext:context];
     
@@ -316,6 +321,15 @@ static NSMutableDictionary* globalSVGKImageCache;
 	NSLog(@"[%@] create Bitmap Image: time taken to render CALayers to texture: %2.3f seconds)", [self class], -1.0f * [startTime timeIntervalSinceNow] );
 	
 	return result;
+}
+
+#if TARGET_OS_IPHONE
+-(UIImage *)bitmapImage
+#else
+-(CGImageRef)bitmapImage
+#endif
+{
+	return [self bitmapImageFlipped:NO];
 }
 
 // the these draw the image 'right side up' in the usual coordinate system with 'point' being the top-left.
